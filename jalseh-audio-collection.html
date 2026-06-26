@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>کلکسیون صوتی جلسه</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:        #1a1a2e;
+    --ink-soft:   #2d2d4a;
+    --paper:      #f5f3ef;
+    --paper-warm: #edeae3;
+    --gold:       #c9a84c;
+    --gold-light: #e8d49a;
+    --gold-dim:   #8a6f2e;
+    --teal:       #2a7c6f;
+    --teal-dim:   #1d5549;
+    --rose:       #9c4a5a;
+    --violet:     #5a3f7a;
+    --sand:       #b8a882;
+    --white:      #ffffff;
+    --radius:     12px;
+    --radius-lg:  20px;
+    --shadow:     0 4px 24px rgba(26,26,46,0.10);
+    --shadow-sm:  0 2px 8px rgba(26,26,46,0.08);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Vazirmatn', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; line-height: 1.7; }
+
+  /* HEADER */
+  header { background: var(--ink); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 20px rgba(0,0,0,0.25); }
+  .header-inner { max-width: 1100px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .header-title { display: flex; align-items: center; gap: 12px; }
+  .header-icon { width: 44px; height: 44px; background: linear-gradient(135deg, var(--gold), var(--gold-dim)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  header h1 { font-size: 20px; font-weight: 700; color: var(--paper); }
+  header p.subtitle { font-size: 12px; color: var(--sand); margin-top: 1px; }
+  .header-stats { display: flex; gap: 16px; align-items: center; }
+  .stat-chip { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 30px; padding: 5px 14px; font-size: 12px; color: var(--gold-light); display: flex; gap: 6px; align-items: center; }
+  .stat-chip strong { font-size: 15px; font-weight: 700; color: var(--gold); }
+
+  /* MINI PLAYER (sticky bottom) */
+  #miniPlayer {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--ink-soft);
+    border-top: 2px solid var(--gold);
+    z-index: 200;
+    padding: 10px 20px;
+    display: none;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.25);
+  }
+  #miniPlayer.visible { display: flex; }
+  .mp-info { flex: 1; min-width: 120px; }
+  .mp-title { font-size: 13px; font-weight: 700; color: var(--paper); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
+  .mp-section { font-size: 11px; color: var(--sand); margin-top: 2px; }
+  .mp-controls { display: flex; gap: 10px; align-items: center; }
+  .mp-btn { background: none; border: none; cursor: pointer; color: var(--gold); font-size: 22px; padding: 4px; line-height: 1; transition: transform .15s; }
+  .mp-btn:hover { transform: scale(1.15); }
+  .mp-btn.close-btn { color: var(--sand); font-size: 18px; }
+  .mp-progress-wrap { flex: 2; min-width: 140px; display: flex; align-items: center; gap: 10px; }
+  .mp-time { font-size: 11px; color: var(--sand); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .mp-bar { flex: 1; height: 4px; background: rgba(255,255,255,0.15); border-radius: 4px; cursor: pointer; position: relative; }
+  .mp-fill { height: 100%; background: var(--gold); border-radius: 4px; width: 0%; transition: width .1s linear; pointer-events: none; }
+  .mp-vol { display: flex; align-items: center; gap: 6px; }
+  .mp-vol input[type=range] { width: 70px; accent-color: var(--gold); cursor: pointer; }
+
+  /* LAYOUT */
+  .main-wrap { max-width: 1100px; margin: 0 auto; padding: 28px 20px 90px; }
+
+  /* TOOLBAR */
+  .toolbar { display: flex; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; align-items: center; }
+  .search-box { flex: 1; min-width: 180px; display: flex; align-items: center; gap: 10px; background: var(--white); border: 1.5px solid #e0dcd4; border-radius: 40px; padding: 10px 18px; box-shadow: var(--shadow-sm); transition: border-color .2s; }
+  .search-box:focus-within { border-color: var(--gold); }
+  .search-box input { flex: 1; border: none; outline: none; font-family: inherit; font-size: 14px; background: transparent; color: var(--ink); direction: rtl; }
+  .search-box .ico { color: var(--sand); font-size: 16px; }
+  .filter-select { background: var(--white); border: 1.5px solid #e0dcd4; border-radius: 40px; padding: 10px 18px; font-family: inherit; font-size: 14px; color: var(--ink); outline: none; cursor: pointer; box-shadow: var(--shadow-sm); direction: rtl; appearance: none; -webkit-appearance: none; padding-left: 36px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23b8a882' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 14px center; }
+  .btn { border: none; cursor: pointer; font-family: inherit; border-radius: 40px; padding: 10px 22px; font-size: 14px; font-weight: 600; transition: all .2s; display: flex; align-items: center; gap: 7px; white-space: nowrap; }
+  .btn-primary { background: linear-gradient(135deg, var(--teal), var(--teal-dim)); color: var(--white); box-shadow: 0 4px 14px rgba(42,124,111,0.35); }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(42,124,111,0.45); }
+  .btn-gold { background: linear-gradient(135deg, var(--gold), var(--gold-dim)); color: var(--ink); box-shadow: 0 4px 14px rgba(201,168,76,0.30); }
+  .btn-gold:hover { transform: translateY(-1px); }
+  .btn-danger { background: rgba(156,74,90,0.12); color: var(--rose); border: 1px solid rgba(156,74,90,0.2); }
+  .btn-danger:hover { background: rgba(156,74,90,0.2); }
+  .btn-sm { padding: 6px 14px; font-size: 12px; border-radius: 30px; }
+  .view-toggle { display: flex; background: var(--paper-warm); border-radius: 30px; padding: 3px; gap: 2px; border: 1px solid #ddd8cf; }
+  .view-btn { padding: 6px 14px; border-radius: 24px; border: none; background: transparent; cursor: pointer; font-size: 16px; color: var(--sand); transition: all .2s; }
+  .view-btn.active { background: var(--white); color: var(--ink); box-shadow: var(--shadow-sm); }
+
+  /* SECTIONS */
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin: 32px 0 14px; padding-bottom: 10px; border-bottom: 2px solid transparent; border-image: linear-gradient(to left, transparent, var(--gold-light), transparent) 1; }
+  .section-name { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+  .section-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .section-count { font-size: 11px; font-weight: 500; background: var(--paper-warm); color: var(--sand); padding: 2px 10px; border-radius: 20px; border: 1px solid #ddd8cf; }
+
+  /* GRID / LIST */
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; }
+  .cards-list { display: flex; flex-direction: column; gap: 10px; }
+
+  /* CARD */
+  .card { background: var(--white); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-sm); border: 1.5px solid #ede9e0; transition: all .25s; position: relative; overflow: hidden; }
+  .card::before { content: ''; position: absolute; top: 0; right: 0; width: 4px; height: 100%; }
+  .card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .card[data-color="teal"]::before   { background: var(--teal); }
+  .card[data-color="gold"]::before   { background: var(--gold); }
+  .card[data-color="rose"]::before   { background: var(--rose); }
+  .card[data-color="violet"]::before { background: var(--violet); }
+  .card[data-color="ink"]::before    { background: var(--ink-soft); }
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
+  .card-num { font-size: 11px; font-weight: 700; color: var(--sand); background: var(--paper); padding: 2px 10px; border-radius: 20px; border: 1px solid #e5e0d6; }
+  .card-actions { display: flex; gap: 5px; opacity: 0; transition: opacity .2s; }
+  .card:hover .card-actions { opacity: 1; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 6px; line-height: 1.4; }
+  .card-section-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; margin-bottom: 10px; }
+  .badge-teal   { background: rgba(42,124,111,.10); color: var(--teal); }
+  .badge-gold   { background: rgba(201,168,76,.12); color: var(--gold-dim); }
+  .badge-rose   { background: rgba(156,74,90,.10); color: var(--rose); }
+  .badge-violet { background: rgba(90,63,122,.10); color: var(--violet); }
+  .badge-ink    { background: rgba(26,26,46,.08); color: var(--ink-soft); }
+  .card-desc { font-size: 13px; color: #6b6580; margin-bottom: 10px; line-height: 1.6; }
+  .card-meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+  .meta-tag { font-size: 11px; color: var(--sand); background: var(--paper); padding: 3px 10px; border-radius: 20px; display: flex; align-items: center; gap: 4px; }
+
+  /* AUDIO PLAYER IN CARD */
+  .card-player { margin-top: 10px; }
+  .card-player-inner { background: var(--paper-warm); border-radius: 10px; padding: 10px 12px; border: 1px solid #e0dbd0; }
+  .cp-row1 { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .cp-play { background: var(--teal); border: none; cursor: pointer; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; color: white; flex-shrink: 0; transition: all .2s; }
+  .cp-play:hover { background: var(--teal-dim); transform: scale(1.08); }
+  .cp-play.playing { background: var(--rose); }
+  .cp-title-small { font-size: 12px; color: var(--ink-soft); font-weight: 600; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cp-time { font-size: 11px; color: var(--sand); white-space: nowrap; }
+  .cp-bar { width: 100%; height: 3px; background: rgba(0,0,0,0.1); border-radius: 3px; cursor: pointer; position: relative; }
+  .cp-fill { height: 100%; background: var(--teal); border-radius: 3px; width: 0%; pointer-events: none; }
+  .cp-open-mini { background: none; border: none; cursor: pointer; color: var(--sand); font-size: 11px; margin-top: 4px; padding: 0; font-family: inherit; }
+  .cp-open-mini:hover { color: var(--teal); }
+
+  /* UPLOAD ZONE */
+  .upload-zone { border: 2px dashed #d5d0c5; border-radius: var(--radius); padding: 20px; text-align: center; color: var(--sand); font-size: 13px; cursor: pointer; transition: all .2s; background: var(--paper); }
+  .upload-zone:hover, .upload-zone.drag { border-color: var(--teal); background: rgba(42,124,111,0.04); color: var(--teal); }
+  .upload-zone input { display: none; }
+  .upload-zone .uz-icon { font-size: 28px; margin-bottom: 6px; }
+  .upload-zone .uz-name { font-size: 12px; color: var(--teal); font-weight: 600; margin-top: 6px; word-break: break-all; }
+  .has-audio-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--teal); background: rgba(42,124,111,0.1); padding: 3px 10px; border-radius: 20px; margin-top: 6px; }
+
+  /* LIST MODE overrides */
+  .cards-list .card { padding: 12px 18px; }
+  .cards-list .card-top { margin-bottom: 0; }
+  .cards-list .card-desc { display: none; }
+  .cards-list .card-player { display: none; }
+  .cards-list .card-meta { display: none; }
+  .cards-list .card-actions { opacity: 1; }
+  .cards-list .card-title { font-size: 14px; margin-bottom: 3px; }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 80px 20px; color: var(--sand); }
+  .empty-state .big-icon { font-size: 60px; margin-bottom: 16px; }
+  .empty-state h2 { font-size: 18px; font-weight: 600; color: var(--ink-soft); margin-bottom: 8px; }
+
+  /* MODAL */
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(26,26,46,0.6); z-index: 1000; backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px; }
+  .modal-bg.open { display: flex; }
+  .modal { background: var(--white); border-radius: var(--radius-lg); width: 100%; max-width: 560px; max-height: 92vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(26,26,46,0.30); animation: slideUp .25s ease; }
+  @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal-head { padding: 22px 26px 18px; border-bottom: 1px solid #edeae3; display: flex; align-items: center; justify-content: space-between; }
+  .modal-head h2 { font-size: 18px; font-weight: 700; }
+  .modal-close { background: var(--paper); border: none; cursor: pointer; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; color: var(--sand); display: flex; align-items: center; justify-content: center; transition: all .2s; }
+  .modal-close:hover { background: #e5e0d5; color: var(--ink); }
+  .modal-body { padding: 22px 26px; }
+  .modal-foot { padding: 14px 26px 22px; display: flex; gap: 10px; border-top: 1px solid #edeae3; }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 13px; font-weight: 600; color: var(--ink-soft); margin-bottom: 6px; }
+  .field input, .field textarea, .field select { width: 100%; background: var(--paper); border: 1.5px solid #ddd8cf; border-radius: var(--radius); padding: 10px 14px; font-family: inherit; font-size: 14px; color: var(--ink); outline: none; transition: border-color .2s; direction: rtl; }
+  .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--gold); background: var(--white); }
+  .field textarea { resize: vertical; min-height: 80px; }
+  .field .hint { font-size: 11px; color: var(--sand); margin-top: 4px; }
+
+  /* SECTION MANAGER */
+  .section-manager { background: var(--paper-warm); border-radius: var(--radius); padding: 14px; border: 1px dashed #d5d0c5; margin-bottom: 16px; }
+  .section-manager h4 { font-size: 13px; font-weight: 600; color: var(--ink-soft); margin-bottom: 10px; }
+  .section-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .section-item { display: flex; align-items: center; gap: 8px; background: var(--white); border-radius: 8px; padding: 8px 12px; font-size: 13px; border: 1px solid #e5e0d6; }
+  .section-item-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .section-item-name { flex: 1; }
+  .section-del { background: none; border: none; cursor: pointer; color: #bbb; font-size: 16px; padding: 0 4px; line-height: 1; }
+  .section-del:hover { color: var(--rose); }
+  .section-add-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .section-add-row input { flex: 1; min-width: 120px; background: var(--white); border: 1.5px solid #ddd8cf; border-radius: 8px; padding: 8px 12px; font-family: inherit; font-size: 13px; outline: none; direction: rtl; }
+  .color-picker-row { display: flex; gap: 8px; align-items: center; }
+  .color-opt { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2.5px solid transparent; transition: all .18s; flex-shrink: 0; }
+  .color-opt.sel { border-color: var(--ink) !important; transform: scale(1.18); }
+  .color-opt[data-c="teal"]   { background: var(--teal); }
+  .color-opt[data-c="gold"]   { background: var(--gold); }
+  .color-opt[data-c="rose"]   { background: var(--rose); }
+  .color-opt[data-c="violet"] { background: var(--violet); }
+  .color-opt[data-c="ink"]    { background: var(--ink-soft); }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 11px 26px; border-radius: 40px; font-size: 14px; font-weight: 500; box-shadow: 0 8px 30px rgba(0,0,0,0.3); z-index: 9999; opacity: 0; transition: opacity .3s; pointer-events: none; white-space: nowrap; }
+  .toast.show { opacity: 1; }
+
+  @media (max-width: 640px) {
+    .header-stats .stat-chip:not(:last-child) { display: none; }
+    .cards-grid { grid-template-columns: 1fr; }
+    .mp-vol { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="header-title">
+      <div class="header-icon">🎙️</div>
+      <div>
+        <h1 id="appTitle">کلکسیون صوتی جلسه</h1>
+        <p class="subtitle" id="appSubtitle">مدیریت و آرشیو فایل‌های صوتی</p>
+      </div>
+    </div>
+    <div class="header-stats">
+      <div class="stat-chip"><span>کل فایل‌ها</span><strong id="totalCount">۰</strong></div>
+      <div class="stat-chip"><span>دارای صدا</span><strong id="audioCount">۰</strong></div>
+      <div class="stat-chip"><span>بخش‌ها</span><strong id="sectionCount">۰</strong></div>
+      <button class="btn btn-gold btn-sm" onclick="openSettings()">⚙️ تنظیمات</button>
+    </div>
+  </div>
+</header>
+
+<!-- MINI PLAYER -->
+<div id="miniPlayer">
+  <div class="mp-controls">
+    <button class="mp-btn" id="mpPlayBtn" onclick="mpToggle()">▶</button>
+  </div>
+  <div class="mp-info">
+    <div class="mp-title" id="mpTitle">—</div>
+    <div class="mp-section" id="mpSection">—</div>
+  </div>
+  <div class="mp-progress-wrap">
+    <span class="mp-time" id="mpCurTime">۰:۰۰</span>
+    <div class="mp-bar" id="mpBar" onclick="mpSeek(event)">
+      <div class="mp-fill" id="mpFill"></div>
+    </div>
+    <span class="mp-time" id="mpDurTime">۰:۰۰</span>
+  </div>
+  <div class="mp-vol">
+    <span style="color:var(--sand);font-size:14px;">🔊</span>
+    <input type="range" min="0" max="1" step="0.05" value="1" oninput="mpVol(this.value)">
+  </div>
+  <button class="mp-btn close-btn" onclick="mpClose()" title="بستن">✕</button>
+</div>
+
+<!-- MAIN -->
+<div class="main-wrap">
+  <div class="toolbar">
+    <div class="search-box">
+      <span class="ico">🔍</span>
+      <input type="text" id="searchInput" placeholder="جستجو در نام یا توضیحات..." oninput="renderAll()">
+    </div>
+    <select class="filter-select" id="filterSection" onchange="renderAll()">
+      <option value="">همه بخش‌ها</option>
+    </select>
+    <div class="view-toggle">
+      <button class="view-btn active" id="vGrid" onclick="setView('grid')">⊞</button>
+      <button class="view-btn" id="vList" onclick="setView('list')">☰</button>
+    </div>
+    <button class="btn btn-primary" onclick="openAddModal()">+ افزودن فایل</button>
+    <button class="btn btn-sm" style="background:var(--paper-warm);border:1px solid #ddd8cf;" onclick="exportData()">💾 پشتیبان</button>
+    <label class="btn btn-sm" style="background:var(--paper-warm);border:1px solid #ddd8cf;cursor:pointer;">
+      📂 بازیابی
+      <input type="file" accept=".json" onchange="importData(event)" style="display:none">
+    </label>
+  </div>
+  <div id="content"></div>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal-bg" id="addModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="modalTitle">افزودن فایل صوتی</h2>
+      <button class="modal-close" onclick="closeModal('addModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>عنوان جلسه / نام فایل *</label>
+        <input type="text" id="fTitle" placeholder="مثال: جلسه اول — مقدمه معارف">
+      </div>
+      <div class="field">
+        <label>بخش / دسته‌بندی</label>
+        <select id="fSection"><option value="">انتخاب بخش...</option></select>
+      </div>
+      <div class="field">
+        <label>🎵 فایل صوتی (آپلود دائمی)</label>
+        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('audioFile').click()" ondragover="uzDrag(event,true)" ondragleave="uzDrag(event,false)" ondrop="uzDrop(event)">
+          <input type="file" id="audioFile" accept="audio/*" onchange="handleAudioFile(this.files[0])">
+          <div class="uz-icon">🎙️</div>
+          <div>کلیک کن یا فایل صوتی بکش اینجا</div>
+          <div style="font-size:11px;margin-top:4px;">MP3، M4A، WAV، OGG پشتیبانی می‌شه</div>
+          <div class="uz-name" id="uzName"></div>
+        </div>
+        <p class="hint">فایل صوتی داخل مرورگر ذخیره می‌شه — همیشه اینجاست</p>
+      </div>
+      <div class="field">
+        <label>توضیحات</label>
+        <textarea id="fDesc" placeholder="خلاصه محتوا، نکات مهم، یا هر چیزی که می‌خوای یادداشت کنی..."></textarea>
+      </div>
+      <div class="field">
+        <label>تاریخ / هفته</label>
+        <input type="text" id="fDate" placeholder="مثال: هفته اول مهر ۱۴۰۳">
+      </div>
+      <div class="field">
+        <label>مدت زمان</label>
+        <input type="text" id="fDuration" placeholder="مثال: ۴۵ دقیقه">
+      </div>
+      <div class="field">
+        <label>برچسب‌ها (با ویرگول جدا کن)</label>
+        <input type="text" id="fTags" placeholder="مثال: اخلاق، تفسیر، نهج البلاغه">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" onclick="saveItem()">✓ ذخیره</button>
+      <button class="btn" style="background:var(--paper);border:1px solid #ddd;" onclick="closeModal('addModal')">انصراف</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-bg" id="settingsModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>⚙️ تنظیمات</h2>
+      <button class="modal-close" onclick="closeModal('settingsModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field"><label>نام کلکسیون</label><input type="text" id="sAppTitle" placeholder="کلکسیون صوتی جلسه"></div>
+      <div class="field"><label>زیرنویس</label><input type="text" id="sAppSubtitle" placeholder="مدیریت و آرشیو فایل‌های صوتی"></div>
+      <div class="section-manager">
+        <h4>🗂️ مدیریت بخش‌ها</h4>
+        <div class="section-list" id="sectionList"></div>
+        <div class="section-add-row">
+          <input type="text" id="newSectionName" placeholder="نام بخش جدید...">
+          <div class="color-picker-row" id="newSectionColor">
+            <div class="color-opt sel" data-c="teal" onclick="pickColor(this)"></div>
+            <div class="color-opt" data-c="gold" onclick="pickColor(this)"></div>
+            <div class="color-opt" data-c="rose" onclick="pickColor(this)"></div>
+            <div class="color-opt" data-c="violet" onclick="pickColor(this)"></div>
+            <div class="color-opt" data-c="ink" onclick="pickColor(this)"></div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="addSection()">+ اضافه</button>
+        </div>
+      </div>
+      <div style="background:rgba(156,74,90,0.06);border:1px solid rgba(156,74,90,0.15);border-radius:10px;padding:12px 14px;font-size:12px;color:#7a3a46;">
+        ⚠️ <strong>پاک‌سازی همه داده‌ها:</strong>
+        <button class="btn btn-danger btn-sm" style="margin-top:8px;width:100%;" onclick="clearAll()">🗑️ حذف همه فایل‌ها و داده‌ها</button>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" onclick="saveSettings()">✓ ذخیره تنظیمات</button>
+      <button class="btn" style="background:var(--paper);border:1px solid #ddd;" onclick="closeModal('settingsModal')">بستن</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<audio id="globalAudio" preload="none"></audio>
+
+<script>
+// ════════════════════════════════════════════
+// INDEXED DB  —  ذخیره‌سازی دائمی فایل صوتی
+// ════════════════════════════════════════════
+const DB_NAME = 'jalseh_db';
+const DB_VER  = 1;
+const AUDIO_STORE = 'audio_files';
+let db = null;
+
+function openDB() {
+  return new Promise((res, rej) => {
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains(AUDIO_STORE))
+        d.createObjectStore(AUDIO_STORE);
+    };
+    req.onsuccess = e => { db = e.target.result; res(db); };
+    req.onerror   = e => rej(e.target.error);
+  });
+}
+
+function dbSaveAudio(id, blob) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(AUDIO_STORE, 'readwrite');
+    tx.objectStore(AUDIO_STORE).put(blob, id);
+    tx.oncomplete = () => res();
+    tx.onerror    = e => rej(e.target.error);
+  });
+}
+
+function dbGetAudio(id) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(AUDIO_STORE, 'readonly');
+    const req = tx.objectStore(AUDIO_STORE).get(id);
+    req.onsuccess = e => res(e.target.result || null);
+    req.onerror   = e => rej(e.target.error);
+  });
+}
+
+function dbDeleteAudio(id) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(AUDIO_STORE, 'readwrite');
+    tx.objectStore(AUDIO_STORE).delete(id);
+    tx.oncomplete = () => res();
+    tx.onerror    = e => rej(e.target.error);
+  });
+}
+
+function dbClearAll() {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(AUDIO_STORE, 'readwrite');
+    tx.objectStore(AUDIO_STORE).clear();
+    tx.oncomplete = () => res();
+    tx.onerror    = e => rej(e.target.error);
+  });
+}
+
+// ════════════════════════════════════════════
+// LOCAL STORAGE  —  اطلاعات و تنظیمات
+// ════════════════════════════════════════════
+const STORE_KEY   = 'jalseh_audio_v2';
+const SECTION_KEY = 'jalseh_sections_v1';
+const CONFIG_KEY  = 'jalseh_config_v1';
+
+const colorMap = { teal:'#2a7c6f', gold:'#c9a84c', rose:'#9c4a5a', violet:'#5a3f7a', ink:'#2d2d4a' };
+const badgeMap = { teal:'badge-teal', gold:'badge-gold', rose:'badge-rose', violet:'badge-violet', ink:'badge-ink' };
+
+function loadItems()    { try { return JSON.parse(localStorage.getItem(STORE_KEY)||'[]'); } catch(e){return[];} }
+function loadSections() { try { return JSON.parse(localStorage.getItem(SECTION_KEY)||'null') || defaultSections(); } catch(e){return defaultSections();} }
+function loadConfig()   { try { return JSON.parse(localStorage.getItem(CONFIG_KEY)||'null') || {}; } catch(e){return {};} }
+function saveItems(a)   { localStorage.setItem(STORE_KEY, JSON.stringify(a)); }
+function saveSections(s){ localStorage.setItem(SECTION_KEY, JSON.stringify(s)); }
+function saveConfig(c)  { localStorage.setItem(CONFIG_KEY, JSON.stringify(c)); }
+function defaultSections() {
+  return [{ id:'s1', name:'بخش اول', color:'teal' },{ id:'s2', name:'بخش دوم', color:'gold' }];
+}
+
+let items    = loadItems();
+let sections = loadSections();
+let config   = loadConfig();
+let editingId   = null;
+let currentView = 'grid';
+let pendingAudioBlob = null;
+let pendingAudioName = null;
+
+function toFarsi(n) { return String(n).replace(/\d/g, d=>'۰۱۲۳۴۵۶۷۸۹'[d]); }
+function fmtTime(s) {
+  if (!isFinite(s)) return '۰:۰۰';
+  const m = Math.floor(s/60), sec = Math.floor(s%60);
+  return toFarsi(m)+':'+toFarsi(String(sec).padStart(2,'0'));
+}
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ════════════════════════════════════════════
+// AUDIO UPLOAD HANDLING
+// ════════════════════════════════════════════
+function handleAudioFile(file) {
+  if (!file) return;
+  pendingAudioBlob = file;
+  pendingAudioName = file.name;
+  document.getElementById('uzName').textContent = '✅ ' + file.name;
+  document.getElementById('uploadZone').style.borderColor = 'var(--teal)';
+}
+function uzDrag(e, on) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.toggle('drag', on);
+}
+function uzDrop(e) {
+  e.preventDefault();
+  uzDrag(e, false);
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('audio/')) handleAudioFile(f);
+  else showToast('❌ فقط فایل صوتی مجاز است');
+}
+
+// ════════════════════════════════════════════
+// MINI PLAYER
+// ════════════════════════════════════════════
+const audio = document.getElementById('globalAudio');
+let currentPlayId = null;
+let objectURLs = {};  // id -> objectURL (freed when changed)
+
+audio.addEventListener('timeupdate', () => {
+  if (!audio.duration) return;
+  const pct = (audio.currentTime / audio.duration * 100).toFixed(1);
+  document.getElementById('mpFill').style.width = pct + '%';
+  document.getElementById('mpCurTime').textContent = fmtTime(audio.currentTime);
+  // sync card bar
+  if (currentPlayId) {
+    const fill = document.querySelector(`.cp-fill[data-id="${currentPlayId}"]`);
+    const ctime = document.querySelector(`.cp-time[data-id="${currentPlayId}"]`);
+    if (fill) fill.style.width = pct + '%';
+    if (ctime) ctime.textContent = fmtTime(audio.currentTime) + ' / ' + fmtTime(audio.duration);
+  }
+});
+audio.addEventListener('loadedmetadata', () => {
+  document.getElementById('mpDurTime').textContent = fmtTime(audio.duration);
+});
+audio.addEventListener('ended', () => {
+  document.getElementById('mpPlayBtn').textContent = '▶';
+  if (currentPlayId) updateCardPlayBtn(currentPlayId, false);
+});
+audio.addEventListener('play', () => { document.getElementById('mpPlayBtn').textContent = '⏸'; });
+audio.addEventListener('pause',() => { document.getElementById('mpPlayBtn').textContent = '▶'; });
+
+function updateCardPlayBtn(id, playing) {
+  const btn = document.querySelector(`.cp-play[data-id="${id}"]`);
+  if (btn) { btn.textContent = playing ? '⏸' : '▶'; btn.classList.toggle('playing', playing); }
+}
+
+async function playItem(id) {
+  const it = items.find(x=>x.id===id);
+  if (!it || !it.hasAudio) return;
+
+  if (currentPlayId === id) {
+    if (audio.paused) { audio.play(); updateCardPlayBtn(id, true); }
+    else              { audio.pause(); updateCardPlayBtn(id, false); }
+    return;
+  }
+
+  // stop previous
+  if (currentPlayId && currentPlayId !== id) {
+    audio.pause();
+    updateCardPlayBtn(currentPlayId, false);
+    if (objectURLs[currentPlayId]) { URL.revokeObjectURL(objectURLs[currentPlayId]); delete objectURLs[currentPlayId]; }
+  }
+
+  try {
+    const blob = await dbGetAudio(id);
+    if (!blob) { showToast('❌ فایل صوتی پیدا نشد'); return; }
+    const url = URL.createObjectURL(blob);
+    objectURLs[id] = url;
+    audio.src = url;
+    audio.load();
+    audio.play();
+    currentPlayId = id;
+    updateCardPlayBtn(id, true);
+
+    // mini player
+    const sec = sections.find(s=>s.id===it.section);
+    document.getElementById('mpTitle').textContent   = it.title || 'بدون عنوان';
+    document.getElementById('mpSection').textContent = sec ? sec.name : '—';
+    document.getElementById('miniPlayer').classList.add('visible');
+  } catch(e) {
+    showToast('❌ خطا در پخش فایل');
+    console.error(e);
+  }
+}
+
+function mpToggle() {
+  if (audio.paused) audio.play();
+  else              audio.pause();
+}
+function mpSeek(e) {
+  if (!audio.duration) return;
+  const rect = document.getElementById('mpBar').getBoundingClientRect();
+  const pct  = (e.clientX - rect.left) / rect.width;
+  audio.currentTime = pct * audio.duration;
+}
+function mpVol(v) { audio.volume = v; }
+function mpClose() {
+  audio.pause();
+  if (currentPlayId) { updateCardPlayBtn(currentPlayId, false); currentPlayId = null; }
+  document.getElementById('miniPlayer').classList.remove('visible');
+}
+
+// ════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════
+function renderAll() {
+  const q   = (document.getElementById('searchInput').value||'').toLowerCase();
+  const sec = document.getElementById('filterSection').value;
+  let filtered = items.filter(it => {
+    const mq = !q || (it.title||'').toLowerCase().includes(q)||(it.desc||'').toLowerCase().includes(q)||(it.tags||'').toLowerCase().includes(q);
+    const ms = !sec || it.section===sec;
+    return mq && ms;
+  });
+
+  const groups = {};
+  sections.forEach(s=>{ groups[s.id]=[]; });
+  groups['_none']=[];
+  filtered.forEach(it => {
+    const g = it.section && groups[it.section] ? it.section : '_none';
+    groups[g].push(it);
+  });
+
+  let html = '';
+  let gi = 0;
+  sections.forEach(s => {
+    const arr = groups[s.id];
+    if (!arr||!arr.length) return;
+    html += `<div class="section-header">
+      <div class="section-name">
+        <span class="section-dot" style="background:${colorMap[s.color]||colorMap.teal}"></span>
+        ${esc(s.name)}
+        <span class="section-count">${toFarsi(arr.length)} فایل</span>
+      </div>
+    </div>
+    <div class="${currentView==='list'?'cards-list':'cards-grid'}">
+      ${arr.map(it=>{ gi++; return cardHTML(it,gi,s); }).join('')}
+    </div>`;
+  });
+  if (groups['_none']&&groups['_none'].length) {
+    const arr=groups['_none'];
+    html+=`<div class="section-header">
+      <div class="section-name"><span class="section-dot" style="background:#ccc"></span>بدون بخش<span class="section-count">${toFarsi(arr.length)} فایل</span></div>
+    </div>
+    <div class="${currentView==='list'?'cards-list':'cards-grid'}">
+      ${arr.map(it=>{ gi++; return cardHTML(it,gi,null); }).join('')}
+    </div>`;
+  }
+  if (!filtered.length) {
+    html = `<div class="empty-state">
+      <div class="big-icon">🎙️</div>
+      <h2>${items.length===0?'هنوز فایلی اضافه نشده':'چیزی یافت نشد'}</h2>
+      <p>${items.length===0?'روی «+ افزودن فایل» کلیک کن':'عبارت جستجو یا فیلتر را تغییر بده'}</p>
+    </div>`;
+  }
+  document.getElementById('content').innerHTML = html;
+
+  // stats
+  document.getElementById('totalCount').textContent = toFarsi(items.length);
+  document.getElementById('audioCount').textContent  = toFarsi(items.filter(i=>i.hasAudio).length);
+  document.getElementById('sectionCount').textContent= toFarsi(sections.length);
+
+  // filter dropdown
+  const fd=document.getElementById('filterSection'), cur=fd.value;
+  fd.innerHTML='<option value="">همه بخش‌ها</option>'+sections.map(s=>`<option value="${s.id}" ${s.id===cur?'selected':''}>${esc(s.name)}</option>`).join('');
+  fd.value=cur;
+
+  // modal section select
+  const ms=document.getElementById('fSection'), mc=ms.value;
+  ms.innerHTML='<option value="">انتخاب بخش...</option>'+sections.map(s=>`<option value="${s.id}" ${s.id===mc?'selected':''}>${esc(s.name)}</option>`).join('');
+  ms.value=mc;
+
+  // config apply
+  const t=config.title||'کلکسیون صوتی جلسه', sub=config.subtitle||'مدیریت و آرشیو فایل‌های صوتی';
+  document.getElementById('appTitle').textContent=t;
+  document.getElementById('appSubtitle').textContent=sub;
+  document.title=t;
+}
+
+function cardHTML(it, idx, sec) {
+  const color  = sec?sec.color:'ink';
+  const badge  = badgeMap[color]||'badge-teal';
+  const secName= sec?sec.name:'بدون بخش';
+  const tags   = (it.tags||'').split('،').map(t=>t.trim()).filter(Boolean);
+  const isList = currentView==='list';
+
+  const playerHTML = it.hasAudio && !isList ? `
+    <div class="card-player">
+      <div class="card-player-inner">
+        <div class="cp-row1">
+          <button class="cp-play" data-id="${it.id}" onclick="playItem('${it.id}')">▶</button>
+          <span class="cp-title-small">${esc(it.audioName||'فایل صوتی')}</span>
+          <span class="cp-time" data-id="${it.id}">۰:۰۰</span>
+        </div>
+        <div class="cp-bar" onclick="cpSeek(event,'${it.id}')"><div class="cp-fill" data-id="${it.id}"></div></div>
+      </div>
+    </div>` : '';
+
+  const hasAudioBadge = it.hasAudio && isList ? `<span class="has-audio-badge">🎵 دارای صدا</span>` : '';
+
+  return `<div class="card" data-color="${color}">
+    <div class="card-top">
+      <span class="card-num">شماره ${toFarsi(idx)}</span>
+      <div class="card-actions">
+        ${it.hasAudio&&isList?`<button class="btn btn-sm" style="background:rgba(42,124,111,0.1);color:var(--teal);border:1px solid rgba(42,124,111,0.2);" onclick="playItem('${it.id}')">▶ پخش</button>`:''}
+        <button class="btn btn-sm" style="background:var(--paper);border:1px solid #e0dcd4;" onclick="editItem('${it.id}')">✏️</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteItem('${it.id}')">🗑️</button>
+      </div>
+    </div>
+    <div class="card-title">${esc(it.title||'بدون عنوان')}</div>
+    <div class="card-section-badge ${badge}">
+      <span style="width:7px;height:7px;border-radius:50%;background:${colorMap[color]||'#ccc'};display:inline-block"></span>
+      ${esc(secName)}
+    </div>
+    ${it.desc&&!isList?`<div class="card-desc">${esc(it.desc)}</div>`:''}
+    ${!isList?`<div class="card-meta">
+      ${it.date?`<span class="meta-tag">📅 ${esc(it.date)}</span>`:''}
+      ${it.duration?`<span class="meta-tag">⏱️ ${esc(it.duration)}</span>`:''}
+      ${tags.map(t=>`<span class="meta-tag"># ${esc(t)}</span>`).join('')}
+    </div>`:''}
+    ${playerHTML}
+    ${hasAudioBadge}
+  </div>`;
+}
+
+// seek from card bar
+function cpSeek(e, id) {
+  if (currentPlayId!==id||!audio.duration) return;
+  const rect=e.currentTarget.getBoundingClientRect();
+  const pct=(e.clientX-rect.left)/rect.width;
+  audio.currentTime=pct*audio.duration;
+}
+
+// ════════════════════════════════════════════
+// CRUD
+// ════════════════════════════════════════════
+function openAddModal() {
+  editingId=null; pendingAudioBlob=null; pendingAudioName=null;
+  document.getElementById('modalTitle').textContent='افزودن فایل صوتی';
+  ['fTitle','fDesc','fDate','fDuration','fTags'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fSection').value='';
+  document.getElementById('uzName').textContent='';
+  document.getElementById('uploadZone').style.borderColor='';
+  openModal('addModal');
+}
+
+function editItem(id) {
+  const it=items.find(x=>x.id===id);
+  if (!it) return;
+  editingId=id; pendingAudioBlob=null; pendingAudioName=null;
+  document.getElementById('modalTitle').textContent='ویرایش فایل صوتی';
+  document.getElementById('fTitle').value   =it.title   ||'';
+  document.getElementById('fSection').value =it.section ||'';
+  document.getElementById('fDesc').value    =it.desc    ||'';
+  document.getElementById('fDate').value    =it.date    ||'';
+  document.getElementById('fDuration').value=it.duration||'';
+  document.getElementById('fTags').value    =it.tags    ||'';
+  document.getElementById('uzName').textContent = it.hasAudio ? ('✅ '+( it.audioName||'فایل موجود')) : '';
+  document.getElementById('uploadZone').style.borderColor = it.hasAudio?'var(--teal)':'';
+  openModal('addModal');
+}
+
+async function saveItem() {
+  const title=document.getElementById('fTitle').value.trim();
+  if (!title) { showToast('❌ عنوان اجباری است'); return; }
+
+  const existing = editingId ? items.find(x=>x.id===editingId) : null;
+  const newId    = editingId || ('i'+Date.now());
+
+  // save audio blob if new
+  if (pendingAudioBlob) {
+    try { await dbSaveAudio(newId, pendingAudioBlob); } catch(e) { showToast('❌ خطا در ذخیره صدا'); return; }
+  }
+
+  const data = {
+    id:        newId,
+    title,
+    section:   document.getElementById('fSection').value,
+    desc:      document.getElementById('fDesc').value.trim(),
+    date:      document.getElementById('fDate').value.trim(),
+    duration:  document.getElementById('fDuration').value.trim(),
+    tags:      document.getElementById('fTags').value.trim(),
+    hasAudio:  pendingAudioBlob ? true : (existing?.hasAudio||false),
+    audioName: pendingAudioBlob ? pendingAudioName : (existing?.audioName||''),
+    created:   existing?.created || Date.now(),
+    updated:   Date.now(),
+  };
+
+  if (editingId) { const i=items.findIndex(x=>x.id===editingId); if(i>-1) items[i]=data; }
+  else items.push(data);
+  saveItems(items);
+  closeModal('addModal');
+  renderAll();
+  showToast(editingId?'✅ فایل ویرایش شد':'✅ فایل اضافه شد');
+  pendingAudioBlob=null; pendingAudioName=null;
+}
+
+async function deleteItem(id) {
+  if (!confirm('آیا مطمئنی؟ فایل و صدای آن حذف می‌شه.')) return;
+  if (currentPlayId===id) mpClose();
+  try { await dbDeleteAudio(id); } catch(e){}
+  items=items.filter(x=>x.id!==id);
+  saveItems(items);
+  renderAll();
+  showToast('🗑️ فایل حذف شد');
+}
+
+// ════════════════════════════════════════════
+// SECTIONS
+// ════════════════════════════════════════════
+function renderSectionList() {
+  const html=sections.map(s=>`
+    <div class="section-item">
+      <span class="section-item-dot" style="background:${colorMap[s.color]||'#ccc'}"></span>
+      <span class="section-item-name">${esc(s.name)}</span>
+      <button class="section-del" onclick="deleteSection('${s.id}')">×</button>
+    </div>`).join('');
+  document.getElementById('sectionList').innerHTML=html||'<p style="font-size:13px;color:#bbb;text-align:center;padding:8px">هنوز بخشی اضافه نشده</p>';
+}
+function addSection() {
+  const name=(document.getElementById('newSectionName').value||'').trim();
+  if (!name) { showToast('❌ نام بخش وارد کن'); return; }
+  const color=document.querySelector('#newSectionColor .color-opt.sel')?.dataset?.c||'teal';
+  sections.push({id:'s'+Date.now(), name, color});
+  saveSections(sections); document.getElementById('newSectionName').value='';
+  renderSectionList(); renderAll(); showToast('✅ بخش اضافه شد');
+}
+function deleteSection(id) {
+  if (!confirm('بخش حذف شه؟')) return;
+  sections=sections.filter(s=>s.id!==id);
+  saveSections(sections); renderSectionList(); renderAll(); showToast('🗑️ بخش حذف شد');
+}
+function pickColor(el) {
+  el.closest('.color-picker-row').querySelectorAll('.color-opt').forEach(x=>x.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+// ════════════════════════════════════════════
+// SETTINGS
+// ════════════════════════════════════════════
+function openSettings() {
+  document.getElementById('sAppTitle').value   =config.title   ||'';
+  document.getElementById('sAppSubtitle').value=config.subtitle||'';
+  renderSectionList(); openModal('settingsModal');
+}
+function saveSettings() {
+  config.title   =document.getElementById('sAppTitle').value.trim()||'کلکسیون صوتی جلسه';
+  config.subtitle=document.getElementById('sAppSubtitle').value.trim()||'مدیریت و آرشیو فایل‌های صوتی';
+  saveConfig(config); closeModal('settingsModal'); renderAll(); showToast('✅ تنظیمات ذخیره شد');
+}
+async function clearAll() {
+  if (!confirm('همه فایل‌ها، صداها و داده‌ها حذف شن؟ این عمل برگشت‌ناپذیر است.')) return;
+  mpClose();
+  await dbClearAll();
+  items=[]; sections=defaultSections(); config={};
+  saveItems(items); saveSections(sections); saveConfig(config);
+  closeModal('settingsModal'); renderAll(); showToast('🗑️ همه چیز پاک شد');
+}
+
+// ════════════════════════════════════════════
+// EXPORT / IMPORT  (metadata only — audio stays in IDB)
+// ════════════════════════════════════════════
+function exportData() {
+  const blob=new Blob([JSON.stringify({items,sections,config},null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='jalseh_backup_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+  showToast('💾 پشتیبان ذخیره شد (فقط اطلاعات — صداها در مرورگر هستن)');
+}
+function importData(e) {
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try {
+      const data=JSON.parse(ev.target.result);
+      if (!confirm('داده‌های فعلی جایگزین شن؟')) return;
+      if(data.items)   { items=data.items;       saveItems(items); }
+      if(data.sections){ sections=data.sections; saveSections(sections); }
+      if(data.config)  { config=data.config;     saveConfig(config); }
+      renderAll(); showToast('✅ داده‌ها بازیابی شدن');
+    } catch { showToast('❌ فایل معتبر نیست'); }
+  };
+  reader.readAsText(file); e.target.value='';
+}
+
+// ════════════════════════════════════════════
+// UI HELPERS
+// ════════════════════════════════════════════
+function setView(v) {
+  currentView=v;
+  document.getElementById('vGrid').classList.toggle('active',v==='grid');
+  document.getElementById('vList').classList.toggle('active',v==='list');
+  renderAll();
+}
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-bg').forEach(bg=>{
+  bg.addEventListener('click',e=>{ if(e.target===bg) bg.classList.remove('open'); });
+});
+
+let toastTimer;
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════
+openDB().then(()=>{ renderAll(); }).catch(err=>{
+  console.error('IndexedDB error:', err);
+  renderAll();
+  showToast('⚠️ ذخیره‌سازی صوتی محدود است');
+});
+</script>
+</body>
+</html>
